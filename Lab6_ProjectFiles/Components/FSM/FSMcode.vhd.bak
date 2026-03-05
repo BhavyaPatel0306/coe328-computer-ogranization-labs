@@ -1,0 +1,56 @@
+Library ieee;
+use ieee.std_logic_1164.all;
+
+entity FSM is
+    port(
+        clk           : in  std_logic;
+        data_in       : in  std_logic;
+        reset         : in  std_logic;
+        student_id    : out std_logic_vector(3 downto 0);
+        current_state : out std_logic_vector(3 downto 0)
+    );
+end entity;
+
+architecture fsm of FSM is
+    type state_type is (s0,s1,s2,s3,s4,s5,s6,s7,s8);
+    signal yfsm : state_type;
+begin
+
+    process (clk, reset)
+    begin
+        if reset = '1' then
+            yfsm <= s0;
+            current_state <= "0000";
+        elsif (clk'event AND clk = '1' AND data_in = '1') then
+            case yfsm is
+                when s0 => yfsm <= s1; current_state <= "0001"; -- 1
+                when s1 => yfsm <= s2; current_state <= "0010"; -- 2
+                when s2 => yfsm <= s3; current_state <= "0011"; -- 3
+                when s3 => yfsm <= s4; current_state <= "0100"; -- 4
+                when s4 => yfsm <= s5; current_state <= "0101"; -- 5
+                when s5 => yfsm <= s6; current_state <= "0110"; -- 6
+                when s6 => yfsm <= s7; current_state <= "0111"; -- 7
+                when s7 => yfsm <= s8; current_state <= "1000"; -- 8
+                when s8 => yfsm <= s0; current_state <= "0000"; -- 9
+            end case;
+        elsif (clk'event AND clk = '1' AND data_in = '0') then
+            yfsm <= yfsm;
+        end if;
+    end process;
+
+    process (yfsm, data_in)
+    begin
+        case yfsm is
+            when s0 => student_id <= "0101"; -- 5
+            when s1 => student_id <= "0000"; -- 0
+            when s2 => student_id <= "0001"; -- 1
+            when s3 => student_id <= "0011"; -- 3
+            when s4 => student_id <= "0000"; -- 0
+            when s5 => student_id <= "1001"; -- 9
+            when s6 => student_id <= "0000"; -- 0
+            when s7 => student_id <= "0100"; -- 4
+            when s8 => student_id <= "1001"; -- 9
+        end case;
+    end process;
+
+end fsm;
